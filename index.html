@@ -1,0 +1,909 @@
+﻿<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>京东外卖海报设计工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --jd-red: #e33333;
+            --jd-red-hover: #c62828;
+            --accent-color: #2196F3;
+            --bg-color: #f8f9fa;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Microsoft YaHei', sans-serif;
+            color: #333;
+            padding-bottom: 50px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, var(--jd-red) 0%, #ff6b6b 100%);
+            color: white;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 20px rgba(227, 51, 51, 0.2);
+        }
+        
+        .header h1 {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+        
+        .editor-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+        
+        /* 海报预览区域 */
+        .poster-preview-container {
+            position: relative;
+        }
+        
+        .poster-preview {
+            width: 375px;
+            height: 667px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .poster-preview:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .poster-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .background-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .qr-code-container {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 5;
+        }
+        
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .qr-code:hover {
+            transform: scale(1.05);
+        }
+        
+        .qr-text {
+            font-size: 18px;
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+        }
+        
+        /* 编辑器面板 */
+        .editor-panel {
+            flex: 1;
+            min-width: 320px;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .panel-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            color: var(--jd-red);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 1rem;
+        }
+        
+        .panel-title i {
+            margin-right: 0.75rem;
+            font-size: 1.5rem;
+        }
+        
+        .panel-title h3 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        /* 表单元素 */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #444;
+            display: block;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(227, 51, 51, 0.2);
+            border-color: var(--jd-red);
+        }
+        
+        /* 按钮样式 */
+        .btn-jd {
+            background: linear-gradient(135deg, var(--jd-red) 0%, #ff6b6b 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(227, 51, 51, 0.3);
+        }
+        
+        .btn-jd:hover {
+            background: linear-gradient(135deg, var(--jd-red-hover) 0%, #e25f5f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(227, 51, 51, 0.4);
+            color: white;
+        }
+        
+        .btn-jd:active {
+            transform: translateY(1px);
+        }
+        
+        /* 颜色选择器 */
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+        
+        .color-option {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.active {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+        
+        /* 模板容器 */
+        .templates-container {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 10px 5px;
+            margin-bottom: 15px;
+            scrollbar-width: thin;
+        }
+        
+        .template {
+            width: 100px;
+            height: 180px;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            border: 3px solid transparent;
+            flex-shrink: 0;
+        }
+        
+        .template:hover {
+            transform: translateY(-5px);
+        }
+        
+        .template.active {
+            border-color: var(--jd-red);
+            box-shadow: 0 5px 15px rgba(227, 51, 51, 0.3);
+        }
+        
+        .template img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 手风琴组件 */
+        .accordion-item {
+            border: none;
+            margin-bottom: 1rem;
+            border-radius: 10px !important;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .accordion-button {
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            background-color: rgba(227, 51, 51, 0.1);
+            color: var(--jd-red);
+        }
+        
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(227, 51, 51, 0.1);
+        }
+        
+        .accordion-body {
+            padding: 1.25rem;
+        }
+        
+        /* 范围控制 */
+        .range-control {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #e0e0e0;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        .range-control::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--jd-red);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .range-control::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        /* 选项卡 */
+        .nav-tabs {
+            border-bottom: none;
+            margin-bottom: 1rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            margin-right: 0.75rem;
+            color: #555;
+            font-weight: 600;
+            background-color: #f0f0f0;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--jd-red);
+            color: white;
+        }
+        
+        .tab-content {
+            padding-top: 0.75rem;
+        }
+        
+        /* 下载选项 */
+        .download-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+        
+        .download-options button {
+            flex: 1;
+        }
+        
+        /* 预览控制 */
+        .preview-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.25rem;
+        }
+        
+        .preview-controls button {
+            background-color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 0 5px;
+            color: #555;
+            transition: all 0.2s ease;
+        }
+        
+        .preview-controls button:hover {
+            background-color: var(--jd-red);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .editor-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .editor-panel {
+                width: 100%;
+                margin-top: 1.5rem;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(227, 51, 51, 0.2);
+            border-top: 5px solid var(--jd-red);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 提示信息 */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .toast.success {
+            background-color: #4caf50;
+        }
+        
+        .toast.error {
+            background-color: #f44336;
+        }
+        
+        .toast i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        #qrcode-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header animate-in">
+        <h1><i class="fas fa-store"></i> 京东外卖海报设计工具</h1>
+        <p>一键生成专属商家入驻海报，提升店铺曝光率</p>
+    </div>
+    
+    <div class="container">
+        <div class="editor-container">
+            <!-- 海报预览区域 -->
+            <div class="poster-preview-container animate-in" style="animation-delay: 0.1s;">
+                <div class="poster-preview" id="poster">
+                    <div class="poster-content">
+                        <img src="https://img30.360buyimg.com/popshop/jfs/t1/287196/7/12722/533020/686fe979F17acb390/4731f92541d2d9a2.jpg" class="background-image" id="bg-image" alt="背景图片">
+                        <div class="qr-code-container">
+                            <img src="qrcode-default.png" class="qr-code" id="qr-image" alt="二维码">
+                            <div class="qr-text" id="qr-text-display">商户名字</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="preview-controls">
+                    <button id="zoom-out" title="缩小"><i class="fas fa-search-minus"></i></button>
+                    <button id="reset-zoom" title="重置大小"><i class="fas fa-expand"></i></button>
+                    <button id="zoom-in" title="放大"><i class="fas fa-search-plus"></i></button>
+                </div>
+            </div>
+            
+            <!-- 编辑器面板 -->
+            <div class="editor-panel animate-in" style="animation-delay: 0.2s;">
+                <div class="panel-title">
+                    <i class="fas fa-palette"></i>
+                    <h3>海报设计选项</h3>
+                </div>
+                
+                <div class="accordion" id="designAccordion">
+                    <!-- 模板选择 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTemplate">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTemplate" aria-expanded="true" aria-controls="collapseTemplate">
+                                <i class="fas fa-images me-2"></i> 选择模板
+                            </button>
+                        </h2>
+                        <div id="collapseTemplate" class="accordion-collapse collapse show" aria-labelledby="headingTemplate" data-bs-parent="#designAccordion">
+                            <div class="accordion-body">
+                                <div class="templates-container">
+                                    <div class="template active" data-bg="https://img30.360buyimg.com/popshop/jfs/t1/287196/7/12722/533020/686fe979F17acb390/4731f92541d2d9a2.jpg">
+                                        <img src="https://img30.360buyimg.com/popshop/jfs/t1/287196/7/12722/533020/686fe979F17acb390/4731f92541d2d9a2.jpg" alt="模板1">
+                                    </div>
+                                    <div class="template" data-bg="https://img30.360buyimg.com/popshop/jfs/t1/300406/24/20949/1017689/686fe984Fb41542d7/6c9d13371d0d8a73.jpg">
+                                        <img src="https://img30.360buyimg.com/popshop/jfs/t1/300406/24/20949/1017689/686fe984Fb41542d7/6c9d13371d0d8a73.jpg" alt="模板2">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mt-3">
+                                    <label for="background-upload" class="form-label">
+                                        <i class="fas fa-upload me-2"></i>上传自定义背景图片
+                                    </label>
+                                    <input type="file" class="form-control" id="background-upload" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 二维码设置 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingQR">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQR" aria-expanded="false" aria-controls="collapseQR">
+                                <i class="fas fa-qrcode me-2"></i> 二维码设置
+                            </button>
+                        </h2>
+                        <div id="collapseQR" class="accordion-collapse collapse" aria-labelledby="headingQR" data-bs-parent="#designAccordion">
+                            <div class="accordion-body">
+                                <!-- 二维码获取方式选项卡 -->
+                                <ul class="nav nav-tabs" id="qrCodeTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="vendor-id-tab" data-bs-toggle="tab" data-bs-target="#vendor-id-content" type="button" role="tab" aria-controls="vendor-id-content" aria-selected="true">
+                                            <i class="fas fa-store me-1"></i> 商家ID生成
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="upload-qr-tab" data-bs-toggle="tab" data-bs-target="#upload-qr-content" type="button" role="tab" aria-controls="upload-qr-content" aria-selected="false">
+                                            <i class="fas fa-upload me-1"></i> 上传二维码
+                                        </button>
+                                    </li>
+                                </ul>
+                                
+                                <!-- 选项卡内容 -->
+                                <div class="tab-content" id="qrCodeTabContent">
+                                    <!-- 商家ID生成二维码 -->
+                                    <div class="tab-pane fade show active" id="vendor-id-content" role="tabpanel" aria-labelledby="vendor-id-tab">
+                                        <div class="form-group">
+                                            <label for="vendor-id" class="form-label">商家ID</label>
+                                            <input type="text" class="form-control" id="vendor-id" placeholder="请输入京东商家ID">
+                                            <small class="form-text text-muted mt-1">输入ID后系统将自动生成店铺二维码</small>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <button class="btn btn-jd" id="generate-qr-btn">
+                                                <i class="fas fa-sync-alt me-2"></i>生成二维码
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- 隐藏的QR容器用于生成 -->
+                                        <div id="qrcode-container"></div>
+                                    </div>
+                                    
+                                    <!-- 上传二维码 -->
+                                    <div class="tab-pane fade" id="upload-qr-content" role="tabpanel" aria-labelledby="upload-qr-tab">
+                                        <div class="form-group">
+                                            <label for="qr-upload" class="form-label">选择二维码图片</label>
+                                            <input type="file" class="form-control" id="qr-upload" accept="image/*">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <hr>
+                                
+                                <!-- 二维码通用设置 -->
+                                <div class="form-group">
+                                    <label for="qr-text" class="form-label">二维码提示文字</label>
+                                    <input type="text" class="form-control" id="qr-text" value="商家名称">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">文字颜色</label>
+                                    <div class="color-picker" id="qr-text-colors">
+                                        <div class="color-option active" style="background-color: white;" data-color="white"></div>
+                                        <div class="color-option" style="background-color: #e33333;" data-color="#e33333"></div>
+                                        <div class="color-option" style="background-color: black;" data-color="black"></div>
+                                        <div class="color-option" style="background-color: #ffeb3b;" data-color="#ffeb3b"></div>
+                                        <div class="color-option" style="background-color: #4caf50;" data-color="#4caf50"></div>
+                                        <div class="color-option" style="background-color: #2196F3;" data-color="#2196F3"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="qr-size" class="form-label">二维码大小: <span id="qr-size-value">130px</span></label>
+                                    <input type="range" class="form-range range-control" id="qr-size" min="80" max="360" step="5" value="130">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="qr-text-position" class="form-label">文字位置: <span id="qr-text-position-value">15px</span></label>
+                                    <input type="range" class="form-range range-control" id="qr-text-position" min="0" max="50" step="1" value="15">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="download-options">
+                    <button class="btn btn-jd btn-lg" id="download-btn">
+                        <i class="fas fa-download me-2"></i>下载海报
+                    </button>
+                    <button class="btn btn-outline-secondary btn-lg" id="preview-btn">
+                        <i class="fas fa-eye me-2"></i>预览
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 加载动画 -->
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- 提示信息容器 -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 缩放控制
+            let currentScale = 1;
+            const poster = document.getElementById('poster');
+            
+            document.getElementById('zoom-in').addEventListener('click', function() {
+                currentScale += 0.1;
+                poster.style.transform = `scale(${currentScale})`;
+            });
+            
+            document.getElementById('zoom-out').addEventListener('click', function() {
+                if (currentScale > 0.5) {
+                    currentScale -= 0.1;
+                    poster.style.transform = `scale(${currentScale})`;
+                }
+            });
+            
+            document.getElementById('reset-zoom').addEventListener('click', function() {
+                currentScale = 1;
+                poster.style.transform = `scale(${currentScale})`;
+            });
+            
+            // 模板选择
+            const templates = document.querySelectorAll('.template');
+            templates.forEach(template => {
+                template.addEventListener('click', function() {
+                    templates.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('bg-image').src = this.dataset.bg;
+                });
+            });
+            
+            // 背景图片上传
+            document.getElementById('background-upload').addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('bg-image').src = event.target.result;
+                        // 取消模板的选中状态
+                        templates.forEach(t => t.classList.remove('active'));
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+            
+            // 二维码上传
+            document.getElementById('qr-upload').addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('qr-image').src = event.target.result;
+                        showToast('二维码已成功上传', 'success');
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+            
+            // 更新二维码文字
+            document.getElementById('qr-text').addEventListener('input', function(e) {
+                document.getElementById('qr-text-display').textContent = e.target.value;
+            });
+            
+            // 二维码文字颜色选择
+            const qrTextColorOptions = document.querySelectorAll('#qr-text-colors .color-option');
+            qrTextColorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    qrTextColorOptions.forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('qr-text-display').style.color = this.dataset.color;
+                });
+            });
+            
+            // 二维码大小调整
+            document.getElementById('qr-size').addEventListener('input', function() {
+                const size = this.value;
+                document.getElementById('qr-size-value').textContent = size + 'px';
+                document.getElementById('qr-image').style.width = size + 'px';
+                document.getElementById('qr-image').style.height = size + 'px';
+            });
+            
+            // 二维码文字位置调整
+            document.getElementById('qr-text-position').addEventListener('input', function() {
+                const position = this.value;
+                document.getElementById('qr-text-position-value').textContent = position + 'px';
+                document.getElementById('qr-text-display').style.marginTop = position + 'px';
+            });
+            
+            // 显示提示信息
+            function showToast(message, type = 'info') {
+                const toastContainer = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                let icon = 'info-circle';
+                if (type === 'success') icon = 'check-circle';
+                if (type === 'error') icon = 'exclamation-circle';
+                
+                toast.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+                toastContainer.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        toastContainer.removeChild(toast);
+                    }, 300);
+                }, 3000);
+            }
+            
+            // 生成二维码
+            document.getElementById('generate-qr-btn').addEventListener('click', function() {
+                const vendorId = document.getElementById('vendor-id').value.trim();
+                
+                if (!vendorId) {
+                    showToast('请输入商家ID', 'error');
+                    return;
+                }
+                
+                if (isNaN(parseInt(vendorId))) {
+                    showToast('商家ID必须是数字', 'error');
+                    return;
+                }
+                
+                const loading = document.getElementById('loading');
+                loading.style.display = 'flex';
+                
+                try {
+                    // 清空之前的二维码
+                    const qrcodeContainer = document.getElementById('qrcode-container');
+                    qrcodeContainer.innerHTML = '';
+                    
+                    // 构建京东小程序链接
+                    const jdUrl = `https://mini-app-static.jd.com/apps/mpshare/index.html?category=jump&des=jdmp&vapptype=1&appId=${vendorId}&param={"venderId":${vendorId},"source":"qrCode","skuId":""}`;
+                    
+                    // 创建新的二维码
+                    new QRCode(qrcodeContainer, {
+                        text: jdUrl,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    
+                    // 等待二维码生成完成
+                    setTimeout(function() {
+                        // 获取生成的二维码图像
+                        const qrImage = qrcodeContainer.querySelector('img');
+                        if (qrImage) {
+                            // 将生成的二维码应用到海报
+                            document.getElementById('qr-image').src = qrImage.src;
+                            loading.style.display = 'none';
+                            showToast('二维码已成功生成！', 'success');
+                        } else {
+                            loading.style.display = 'none';
+                            showToast('二维码生成失败，请重试', 'error');
+                        }
+                    }, 500);
+                } catch (error) {
+                    loading.style.display = 'none';
+                    showToast('二维码生成失败，请重试', 'error');
+                    console.error("二维码生成错误:", error);
+                }
+            });
+            
+            // 当输入框内容变化并按下回车键时也生成二维码
+            document.getElementById('vendor-id').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    document.getElementById('generate-qr-btn').click();
+                }
+            });
+            
+            // 下载海报功能
+            document.getElementById('download-btn').addEventListener('click', function() {
+                const loading = document.getElementById('loading');
+                loading.style.display = 'flex';
+                showToast('正在准备下载，请稍候...', 'info');
+                
+                // 保存原始状态
+                const originalTransform = poster.style.transform;
+                poster.style.transform = 'scale(1)';
+                
+                // 给足够的时间让浏览器渲染和处理
+                setTimeout(function() {
+                    try {
+                        // 使用简单的设置，优先保证下载功能
+                        const options = {
+                            scale: 2,
+                            useCORS: true,
+                            allowTaint: true,
+                            backgroundColor: null,
+                            logging: false,
+                            imageTimeout: 0
+                        };
+                        
+                        html2canvas(document.getElementById('poster'), options)
+                            .then(function(canvas) {
+                                try {
+                                    // 直接使用dataURL方式下载
+                                    const dataURL = canvas.toDataURL('image/png');
+                                    const link = document.createElement('a');
+                                    link.href = dataURL;
+                                    link.download = '京东外卖海报.png';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    
+                                    loading.style.display = 'none';
+                                    showToast('海报已成功下载！', 'success');
+                                } catch (err) {
+                                    loading.style.display = 'none';
+                                    showToast('下载失败，请重试', 'error');
+                                }
+                                
+                                // 恢复原始缩放
+                                poster.style.transform = originalTransform;
+                            })
+                            .catch(function(err) {
+                                loading.style.display = 'none';
+                                showToast('海报生成失败，请重试', 'error');
+                                poster.style.transform = originalTransform;
+                            });
+                    } catch (err) {
+                        loading.style.display = 'none';
+                        showToast('下载功能初始化失败，请刷新页面后重试', 'error');
+                        poster.style.transform = originalTransform;
+                    }
+                }, 1000);
+            });
+            
+            // 预览按钮
+            document.getElementById('preview-btn').addEventListener('click', function() {
+                showToast('正在预览模式，可以继续调整', 'info');
+            });
+        });
+    </script>
+</body>
+</html>
